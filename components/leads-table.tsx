@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { ChevronLeft, ChevronRight, Lock, Unlock, Filter, MessageCircle, Phone } from "lucide-react"
+import { ChevronLeft, ChevronRight, Lock, Unlock, Filter, MessageCircle, Phone, Search, X } from "lucide-react"
 import { getClientes, updateClienteStatus, type Cliente } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 
@@ -25,6 +26,9 @@ const ITEMS_PER_PAGE = 20
 export function LeadsTable() {
   const [currentPage, setCurrentPage] = useState(1)
   const [clientes, setClientes] = useState<Cliente[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "locked">("all")
+  const [interestFilter, setInterestFilter] = useState<"all" | "interested" | "not-interested">("all")
   const [showFollowUpFilter, setShowFollowUpFilter] = useState(false)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
@@ -47,7 +51,33 @@ export function LeadsTable() {
     loadClientes()
   }, [])
 
-  const filteredClientes = showFollowUpFilter ? clientes.filter((cliente) => cliente.follow_up >= 1) : clientes
+  // Apply all filters
+  const filteredClientes = clientes.filter((cliente) => {
+    // Search filter
+    const searchLower = searchQuery.toLowerCase()
+    const matchesSearch =
+      !searchQuery ||
+      cliente.nome?.toLowerCase().includes(searchLower) ||
+      cliente.telefone?.includes(searchQuery)
+
+    // Status filter
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && !cliente.trava) ||
+      (statusFilter === "locked" && cliente.trava)
+
+    // Interest filter
+    const matchesInterest =
+      interestFilter === "all" ||
+      (interestFilter === "interested" && cliente.interessado) ||
+      (interestFilter === "not-interested" && !cliente.interessado)
+
+    // Follow-up filter
+    const matchesFollowUp = !showFollowUpFilter || cliente.follow_up >= 1
+
+    return matchesSearch && matchesStatus && matchesInterest && matchesFollowUp
+  })
+
   const totalPages = Math.ceil(filteredClientes.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
@@ -78,56 +108,112 @@ export function LeadsTable() {
     }
   }
 
-  const toggleFollowUpFilter = () => {
-    setShowFollowUpFilter(!showFollowUpFilter)
-    setCurrentPage(1)
-  }
-
-  const clearFilter = () => {
+  const clearAllFilters = () => {
+    setSearchQuery("")
+    setStatusFilter("all")
+    setInterestFilter("all")
     setShowFollowUpFilter(false)
     setCurrentPage(1)
   }
 
+  const hasActiveFilters = searchQuery || statusFilter !== "all" || interestFilter !== "all" || showFollowUpFilter
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-dark-green)] text-white shadow-md shadow-[var(--whatsapp-green)]/20">
-              <MessageCircle className="h-5 w-5" />
+        <CardTitle className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-dark-green)] text-white shadow-md shadow-[var(--whatsapp-green)]/20">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+              <span className="text-xl">Clientes do WhatsApp</span>
             </div>
-            <span className="text-xl">Clientes do WhatsApp</span>
+            <Badge variant="secondary" className="font-medium">
+              {filteredClientes.length} {filteredClientes.length === 1 ? "cliente" : "clientes"}
+            </Badge>
           </div>
-          <div className="flex items-center gap-2">
-            {!showFollowUpFilter ? (
+
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome ou telefone..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="pl-9 pr-9 h-10"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              {/* Status Filter */}
               <Button
-                variant="outline"
+                variant={statusFilter !== "all" ? "default" : "outline"}
                 size="sm"
-                onClick={toggleFollowUpFilter}
-                className="flex items-center gap-2 bg-transparent hover:bg-accent transition-colors duration-200"
+                onClick={() => {
+                  setStatusFilter(statusFilter === "all" ? "active" : statusFilter === "active" ? "locked" : "all")
+                  setCurrentPage(1)
+                }}
+                className={statusFilter !== "all" ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)]" : ""}
               >
-                <Filter className="h-4 w-4" />
+                <Filter className="h-4 w-4 mr-2" />
+                {statusFilter === "all" ? "Status" : statusFilter === "active" ? "Ativos" : "Travados"}
+              </Button>
+
+              {/* Interest Filter */}
+              <Button
+                variant={interestFilter !== "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setInterestFilter(
+                    interestFilter === "all"
+                      ? "interested"
+                      : interestFilter === "interested"
+                        ? "not-interested"
+                        : "all"
+                  )
+                  setCurrentPage(1)
+                }}
+                className={interestFilter !== "all" ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)]" : ""}
+              >
+                {interestFilter === "all" ? "Interesse" : interestFilter === "interested" ? "Interessados" : "Sem Interesse"}
+              </Button>
+
+              {/* Follow-up Filter */}
+              <Button
+                variant={showFollowUpFilter ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setShowFollowUpFilter(!showFollowUpFilter)
+                  setCurrentPage(1)
+                }}
+                className={showFollowUpFilter ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)]" : ""}
+              >
                 Follow Up
               </Button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="default" size="sm" onClick={toggleFollowUpFilter} className="flex items-center gap-2 bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)] transition-colors duration-200">
-                  <Filter className="h-4 w-4" />
-                  Follow Up
+
+              {/* Clear Filters */}
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-muted-foreground">
+                  <X className="h-4 w-4 mr-2" />
+                  Limpar
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearFilter}
-                  className="flex items-center gap-2 bg-transparent hover:bg-accent transition-colors duration-200"
-                >
-                  Mostrar Todos
-                </Button>
-              </div>
-            )}
-            <Badge variant="secondary" className="font-medium">
-              {filteredClientes.length} {showFollowUpFilter ? "com follow up" : "clientes"}
-            </Badge>
+              )}
+            </div>
           </div>
         </CardTitle>
       </CardHeader>
@@ -164,8 +250,10 @@ export function LeadsTable() {
                       </TableCell>
                       <TableCell>
                         <Badge 
-                          variant={cliente.interessado ? "default" : "secondary"}
-                          className={cliente.interessado ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)] transition-colors" : ""}
+                          className={cliente.interessado 
+                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800" 
+                            : "bg-muted text-muted-foreground border-border"
+                          }
                         >
                           {cliente.interessado ? "Sim" : "Não"}
                         </Badge>
@@ -177,8 +265,10 @@ export function LeadsTable() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={!cliente.trava ? "default" : "secondary"}
-                          className={!cliente.trava ? "text-white" : "text-orange-500"}
+                          className={!cliente.trava 
+                            ? "bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800" 
+                            : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                          }
                         >
                           {!cliente.trava ? "Ativo" : "Travado"}
                         </Badge>

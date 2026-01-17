@@ -4,65 +4,75 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.55 0.15 142); /* WhatsApp Green */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --background: oklch(1 0 0); /* Branco puro */
+  --foreground: oklch(0.145 0 0); /* Preto quase puro */
+  --card: oklch(1 0 0); /* Branco */
+  --card-foreground: oklch(0.145 0 0); /* Texto escuro */
+  --popover: oklch(1 0 0); /* Branco */
+  --popover-foreground: oklch(0.145 0 0); /* Texto escuro */
+  --primary: oklch(0.205 0 0); /* Cinza muito escuro */
+  --primary-foreground: oklch(0.985 0 0); /* Quase branco */
+  --secondary: oklch(0.97 0 0); /* Cinza muito claro */
+  --secondary-foreground: oklch(0.205 0 0); /* Cinza escuro */
+  --muted: oklch(0.97 0 0); /* Cinza claro */
+  --muted-foreground: oklch(0.556 0 0); /* Cinza médio */
+  --accent: oklch(0.97 0 0); /* Cinza claro */
+  --accent-foreground: oklch(0.205 0 0); /* Cinza escuro */
+  --destructive: oklch(0.577 0.245 27.325); /* Vermelho */
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.55 0.15 142);
-  --chart-1: oklch(0.55 0.15 142); /* WhatsApp Green */
-  --chart-2: oklch(0.6 0.118 184.704); /* Blue */
-  --chart-3: oklch(0.7 0.15 85); /* Yellow-Green */
-  --chart-4: oklch(0.45 0.12 142); /* Dark Green */
-  --chart-5: oklch(0.65 0.18 160); /* Teal */
-  --radius: 0.5rem;
-  --whatsapp-green: oklch(0.55 0.15 142);
-  --whatsapp-dark-green: oklch(0.45 0.12 142);
-  --whatsapp-light-green: oklch(0.85 0.08 142);
+  --border: oklch(0.922 0 0); /* Cinza muito claro */
+  --input: oklch(0.922 0 0); /* Cinza muito claro */
+  --ring: oklch(0.708 0 0); /* Cinza médio */
+  --chart-1: oklch(0.646 0.222 41.116); /* Laranja */
+  --chart-2: oklch(0.6 0.118 184.704); /* Ciano */
+  --chart-3: oklch(0.398 0.07 227.392); /* Azul escuro */
+  --chart-4: oklch(0.828 0.189 84.429); /* Verde-amarelo */
+  --chart-5: oklch(0.769 0.188 70.08); /* Amarelo */
+  --radius: 0.625rem; /* 10px - OdontoVida */
+  --sidebar: oklch(0.985 0 0); /* Quase branco */
+  --sidebar-foreground: oklch(0.145 0 0); /* Preto */
+  --sidebar-primary: oklch(0.205 0 0); /* Cinza escuro */
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0); /* Cinza claro */
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0); /* Cinza claro */
+  --sidebar-ring: oklch(0.708 0 0); /* Cinza médio */
 }
 
 .dark {
-  /* Updated to dark theme with WhatsApp green accents */
-  --background: oklch(0.08 0 0); /* Very dark background like Vercel */
-  --foreground: oklch(0.95 0 0);
-  --card: oklch(0.12 0 0); /* Dark cards */
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.65 0.15 142); /* Brighter WhatsApp Green for dark mode */
-  --primary-foreground: oklch(0.08 0 0);
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.18 0 0);
-  --accent-foreground: oklch(0.95 0 0);
-  --destructive: oklch(0.55 0.2 25);
-  --destructive-foreground: oklch(0.95 0 0);
-  --border: oklch(0.18 0 0);
-  --input: oklch(0.18 0 0);
-  --ring: oklch(0.65 0.15 142);
-  --chart-1: oklch(0.65 0.15 142); /* WhatsApp Green */
-  --chart-2: oklch(0.6 0.15 220); /* Blue */
-  --chart-3: oklch(0.7 0.15 85); /* Yellow-Green */
-  --chart-4: oklch(0.45 0.12 142); /* Dark Green */
-  --chart-5: oklch(0.65 0.18 160); /* Teal */
-  --whatsapp-green: oklch(0.65 0.15 142);
-  --whatsapp-dark-green: oklch(0.45 0.12 142);
-  --whatsapp-light-green: oklch(0.25 0.08 142);
+  /* Dark mode OdontoVida - cores profissionais */
+  --background: oklch(0.145 0 0); /* Preto quase puro */
+  --foreground: oklch(0.985 0 0); /* Branco quase puro */
+  --card: oklch(0.205 0 0); /* Cinza muito escuro */
+  --card-foreground: oklch(0.985 0 0); /* Branco */
+  --popover: oklch(0.205 0 0); /* Cinza muito escuro */
+  --popover-foreground: oklch(0.985 0 0); /* Branco */
+  --primary: oklch(0.922 0 0); /* Cinza muito claro */
+  --primary-foreground: oklch(0.205 0 0); /* Cinza escuro */
+  --secondary: oklch(0.269 0 0); /* Cinza escuro */
+  --secondary-foreground: oklch(0.985 0 0); /* Branco */
+  --muted: oklch(0.269 0 0); /* Cinza escuro */
+  --muted-foreground: oklch(0.708 0 0); /* Cinza médio */
+  --accent: oklch(0.269 0 0); /* Cinza escuro */
+  --accent-foreground: oklch(0.985 0 0); /* Branco */
+  --destructive: oklch(0.704 0.191 22.216); /* Vermelho claro */
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%); /* Branco 10% opacidade */
+  --input: oklch(1 0 0 / 15%); /* Branco 15% opacidade */
+  --ring: oklch(0.556 0 0); /* Cinza médio */
+  --chart-1: oklch(0.488 0.243 264.376); /* Roxo */
+  --chart-2: oklch(0.696 0.17 162.48); /* Verde-ciano */
+  --chart-3: oklch(0.769 0.188 70.08); /* Amarelo */
+  --chart-4: oklch(0.627 0.265 303.9); /* Magenta */
+  --chart-5: oklch(0.645 0.246 16.439); /* Laranja-vermelho */
+  --sidebar: oklch(0.205 0 0); /* Cinza muito escuro */
+  --sidebar-foreground: oklch(0.985 0 0); /* Branco */
+  --sidebar-primary: oklch(0.488 0.243 264.376); /* Roxo */
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0); /* Cinza escuro */
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%); /* Branco 10% */
+  --sidebar-ring: oklch(0.556 0 0); /* Cinza médio */
 }
 
 @theme inline {
@@ -114,3 +124,168 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom animations for login page */
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, -40px) scale(1.15);
+  }
+}
+
+@keyframes float-slower {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(50px, 30px) scale(0.85);
+  }
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 20s ease-in-out infinite;
+  }
+  .animate-float-slow {
+    animation: float-slow 25s ease-in-out infinite;
+  }
+  .animate-float-slower {
+    animation: float-slower 30s ease-in-out infinite;
+  }
+  .animate-gradient-shift {
+    animation: gradient-shift 8s ease-in-out infinite;
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+  
+  /* Glassmorphism utilities */
+  .glass {
+    background: rgba(18, 18, 18, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-card {
+    background: linear-gradient(135deg, rgba(18, 18, 18, 0.8) 0%, rgba(25, 25, 25, 0.6) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+  
+  .glass-border {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Premium gradients - OdontoVida Blue-Indigo */
+  .gradient-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  }
+  
+  .gradient-card {
+    background: linear-gradient(135deg, var(--card) 0%, oklch(0.14 0 0) 100%);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Hover effects */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+  
+  .hover-glow {
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+  }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Additional CSS Variables for CRM - OdontoVida */
+:root {
+  --glass-bg: oklch(0.12 0 0 / 0.7);
+  --glass-border: oklch(0.25 0 0 / 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  
+  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  --gradient-card: linear-gradient(135deg, var(--card) 0%, oklch(0.14 0 0) 100%);
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.3);
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+}
+
+.dark {
+  --glass-bg: oklch(0.12 0 0 / 0.8);
+  --glass-border: oklch(0.25 0 0 / 0.4);
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+

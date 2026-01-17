@@ -7,9 +7,8 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { MessageCircle } from "lucide-react"
+import { Mail, Lock } from "lucide-react"
 import { signInWithEmail } from "@/lib/supabase"
 
 export function LoginForm() {
@@ -23,8 +22,11 @@ export function LoginForm() {
     e.preventDefault()
     setIsLoading(true)
 
+    const trimmedEmail = email.trim()
+    const trimmedPassword = password.trim()
+
     try {
-      const { data, error } = await signInWithEmail(email, password)
+      const { data, error } = await signInWithEmail(trimmedEmail, trimmedPassword)
 
       if (error) {
         toast({
@@ -40,6 +42,7 @@ export function LoginForm() {
         router.push("/dashboard")
       }
     } catch (error) {
+      console.error("Login error:", error)
       toast({
         title: "Erro no login",
         description: "Ocorreu um erro inesperado. Tente novamente.",
@@ -51,65 +54,76 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md shadow-2xl border-0 bg-card/95 backdrop-blur-sm">
-      <CardHeader className="text-center space-y-4 pb-6">
-        <div className="flex justify-center">
-          <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-dark-green)] text-white shadow-lg shadow-[var(--whatsapp-green)]/30">
-            <MessageCircle className="h-8 w-8" />
-          </div>
-        </div>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="space-y-2">
+        <h2 className="text-3xl font-bold text-white">Bem-vindo de volta</h2>
+        <p className="text-gray-400">Insira suas credenciais para acessar o sistema</p>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Email Field */}
         <div className="space-y-2">
-          <CardTitle className="text-2xl font-bold tracking-tight">Dashboard WhatsApp</CardTitle>
-          <p className="text-sm text-muted-foreground">Sistema fechado - Apenas usuários autorizados</p>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+          <Label htmlFor="email" className="text-sm font-medium text-gray-300">
+            Email
+          </Label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail className="h-5 w-5 text-gray-500" />
+            </div>
             <Input
               id="email"
               type="email"
-              placeholder="seu@email.com"
+              placeholder="iraquianrodrigues@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="h-11 transition-all duration-200 focus-visible:ring-[var(--whatsapp-green)]"
+              className="h-12 pl-10 bg-[#1a1a1a] border-gray-800 text-white placeholder:text-gray-600 focus:border-[var(--whatsapp-green)] focus:ring-1 focus:ring-[var(--whatsapp-green)] transition-colors"
               disabled={isLoading}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
+        </div>
+
+        {/* Password Field */}
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-sm font-medium text-gray-300">
+            Senha
+          </Label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock className="h-5 w-5 text-gray-500" />
+            </div>
             <Input
               id="password"
               type="password"
-              placeholder="Sua senha"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="h-11 transition-all duration-200 focus-visible:ring-[var(--whatsapp-green)]"
+              className="h-12 pl-10 bg-[#1a1a1a] border-gray-800 text-white placeholder:text-gray-600 focus:border-[var(--whatsapp-green)] focus:ring-1 focus:ring-[var(--whatsapp-green)] transition-colors"
               disabled={isLoading}
             />
           </div>
-          <Button 
-            type="submit" 
-            className="w-full h-11 bg-gradient-to-r from-[var(--whatsapp-green)] to-[var(--whatsapp-dark-green)] hover:from-[var(--whatsapp-dark-green)] hover:to-[var(--whatsapp-green)] text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Entrando...
-              </span>
-            ) : (
-              "Entrar"
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className="w-full h-12 bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)] text-white font-semibold transition-colors duration-200"
+          disabled={isLoading}
+        >
+          {isLoading ? "Entrando..." : "Entrar no Sistema"}
+        </Button>
+      </form>
+
+      {/* Footer */}
+      <div className="text-center text-sm text-gray-500">
+        <p>Sistema restrito. Apenas usuários autorizados da Dashboard WhatsApp</p>
+        <p className="mt-2 text-xs">
+          Desenvolvido com 💚 por <span className="text-[var(--whatsapp-green)]">AutomateAI</span>
+        </p>
+      </div>
+    </div>
   )
 }

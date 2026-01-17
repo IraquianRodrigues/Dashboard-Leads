@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MessageCircle, MessageSquareCode as MessageSquareCheck, Clock, MessageSquareX, Phone } from "lucide-react"
-import { getClientes, type Cliente } from "@/lib/supabase"
+import { StatCard } from "@/components/ui/stat-card"
+import { MessageCircle, CheckCircle, Clock, MessageSquareX, Phone, TrendingUp } from "lucide-react"
+import { getClientes } from "@/lib/supabase"
+import type { Cliente } from "@/lib/types"
 
 const calculateMetrics = (clientes: Cliente[]) => {
   const totalLeads = clientes.length
@@ -17,12 +18,28 @@ const calculateMetrics = (clientes: Cliente[]) => {
   const conversasTravadas = clientes.filter((cliente) => cliente.trava).length
   const taxaConversao = totalLeads > 0 ? ((interestedLeads / totalLeads) * 100).toFixed(1) : "0"
 
+  // Calcular tendências (comparação com período anterior)
+  const fourteenDaysAgo = new Date()
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  
+  const leadsPreviousWeek = clientes.filter((cliente) => {
+    const clienteDate = new Date(cliente.created_at)
+    return clienteDate >= fourteenDaysAgo && clienteDate < sevenDaysAgo
+  }).length
+
+  const trendPercentage = leadsPreviousWeek > 0 
+    ? Math.round(((leadsLast7Days - leadsPreviousWeek) / leadsPreviousWeek) * 100)
+    : leadsLast7Days > 0 ? 100 : 0
+
   return {
     totalLeads,
     interestedLeads,
     leadsLast7Days,
     conversasTravadas,
     taxaConversao,
+    trendPercentage,
   }
 }
 
@@ -50,110 +67,97 @@ export function DashboardMetrics() {
 
   const metrics = calculateMetrics(clientes)
 
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
+              <MessageCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Dashboard CRM</h2>
+              <p className="text-muted-foreground text-sm">Acompanhe seus leads</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-32 rounded-xl border bg-card animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-dark-green)] text-white shadow-lg shadow-[var(--whatsapp-green)]/20">
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
             <MessageCircle className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Dashboard WhatsApp</h2>
-            <p className="text-muted-foreground text-sm">Acompanhe o atendimento</p>
+            <h2 className="text-2xl font-bold tracking-tight">Dashboard CRM</h2>
+            <p className="text-muted-foreground text-sm">Acompanhe seus leads em tempo real</p>
           </div>
         </div>
         {!loading && clientes.length > 0 && (
           <div className="text-right hidden md:block">
             <div className="text-sm text-muted-foreground">Última atualização</div>
-            <div className="text-xs text-muted-foreground">{new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div className="text-xs text-muted-foreground">
+              {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
         )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-[var(--whatsapp-green)] shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Total de Leads</CardTitle>
-            <div className="h-10 w-10 rounded-lg bg-[var(--whatsapp-light-green)] flex items-center justify-center group-hover:bg-[var(--whatsapp-green)] group-hover:scale-110 transition-all duration-300">
-              <Phone className="h-5 w-5 text-[var(--whatsapp-green)] group-hover:text-white transition-colors duration-300" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground mb-1">
-              {loading ? (
-                <span className="inline-block w-12 h-8 bg-muted animate-pulse rounded"></span>
-              ) : (
-                metrics.totalLeads.toLocaleString()
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">Contatos no WhatsApp</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total de Leads"
+          value={metrics.totalLeads.toLocaleString()}
+          description="Contatos no WhatsApp"
+          icon={<Phone className="h-5 w-5" />}
+          variant="primary"
+        />
 
-        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Leads Interessados</CardTitle>
-            <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-950/30 flex items-center justify-center group-hover:bg-green-500 group-hover:scale-110 transition-all duration-300">
-              <MessageSquareCheck className="h-5 w-5 text-green-500 group-hover:text-white transition-colors duration-300" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline gap-2 mb-1">
-              <div className="text-3xl font-bold text-green-500">
-                {loading ? (
-                  <span className="inline-block w-12 h-8 bg-muted animate-pulse rounded"></span>
-                ) : (
-                  metrics.interestedLeads
-                )}
-              </div>
-              {!loading && metrics.totalLeads > 0 && (
-                <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                  ({metrics.taxaConversao}%)
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">Responderam positivamente</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Leads Interessados"
+          value={metrics.interestedLeads}
+          description={`Taxa de conversão: ${metrics.taxaConversao}%`}
+          icon={<CheckCircle className="h-5 w-5" />}
+          variant="success"
+          trend={{
+            value: Number(metrics.taxaConversao),
+            label: "taxa de conversão",
+          }}
+        />
 
-        <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Novos (7 dias)</CardTitle>
-            <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center group-hover:bg-blue-500 group-hover:scale-110 transition-all duration-300">
-              <Clock className="h-5 w-5 text-blue-500 group-hover:text-white transition-colors duration-300" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-500 mb-1">
-              {loading ? (
-                <span className="inline-block w-12 h-8 bg-muted animate-pulse rounded"></span>
-              ) : (
-                metrics.leadsLast7Days
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">Novos contatos esta semana</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Novos (7 dias)"
+          value={metrics.leadsLast7Days}
+          description="Novos contatos esta semana"
+          icon={<Clock className="h-5 w-5" />}
+          variant="default"
+          trend={{
+            value: metrics.trendPercentage,
+            label: "vs semana anterior",
+          }}
+        />
 
-        <Card className="border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Conversas Travadas</CardTitle>
-            <div className="h-10 w-10 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center group-hover:bg-red-500 group-hover:scale-110 transition-all duration-300">
-              <MessageSquareX className="h-5 w-5 text-red-500 group-hover:text-white transition-colors duration-300" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-red-500 mb-1">
-              {loading ? (
-                <span className="inline-block w-12 h-8 bg-muted animate-pulse rounded"></span>
-              ) : (
-                metrics.conversasTravadas
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">Conversas pausadas/travadas</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Conversas Travadas"
+          value={metrics.conversasTravadas}
+          description="Conversas pausadas/travadas"
+          icon={<MessageSquareX className="h-5 w-5" />}
+          variant="danger"
+        />
       </div>
     </div>
   )
 }
+
