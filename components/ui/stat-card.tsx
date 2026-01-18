@@ -21,9 +21,9 @@ const variantStyles = {
     border: "border-l-border",
   },
   primary: {
-    iconBg: "bg-[var(--whatsapp-light-green)]",
-    iconColor: "text-[var(--whatsapp-green)]",
-    border: "border-l-[var(--whatsapp-green)]",
+    iconBg: "bg-gradient-to-br from-[#25D366]/20 to-[#128C7E]/20",
+    iconColor: "text-[#25D366]",
+    border: "border-l-[#25D366]",
   },
   success: {
     iconBg: "bg-green-50 dark:bg-green-950/30",

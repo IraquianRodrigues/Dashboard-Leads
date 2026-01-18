@@ -5,6 +5,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 import { getPipelineStages, getClientes, updateLeadStage, createActivity } from "@/lib/supabase"
 import type { PipelineStage, Cliente } from "@/lib/types"
 import { NewLeadModal } from "@/components/new-lead-modal"
+import { LeadClosureModal } from "@/components/lead-closure-modal"
+import type { LeadClosureType } from "@/lib/lead-closure-types"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -34,6 +36,9 @@ export default function PipelinePage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false)
+  const [closureModalOpen, setClosureModalOpen] = useState(false)
+  const [closureType, setClosureType] = useState<LeadClosureType | null>(null)
+  const [closingLead, setClosingLead] = useState<Cliente | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -93,7 +98,31 @@ export default function PipelinePage() {
 
     const leadId = parseInt(draggableId)
     const newStageId = destination.droppableId === "no-stage" ? null : parseInt(destination.droppableId)
+    const lead = leads.find(l => l.id === leadId)
+    const targetStage = stages.find(s => s.id === newStageId)
 
+    // Detectar se foi movido para estágio final
+    if (targetStage && lead) {
+      const stageName = targetStage.nome.toLowerCase()
+      
+      if (stageName.includes('fechado') && stageName.includes('ganho')) {
+        // Abrir modal de fechamento como ganho
+        setClosingLead(lead)
+        setClosureType('won')
+        setClosureModalOpen(true)
+        return // Não mover ainda, esperar modal
+      }
+      
+      if (stageName.includes('fechado') && stageName.includes('perdido')) {
+        // Abrir modal de fechamento como perdido
+        setClosingLead(lead)
+        setClosureType('lost')
+        setClosureModalOpen(true)
+        return // Não mover ainda, esperar modal
+      }
+    }
+
+    // Movimentação normal (não é estágio final)
     setLeads((prevLeads) =>
       prevLeads.map((lead) =>
         lead.id === leadId ? { ...lead, stage_id: newStageId } : lead
@@ -136,6 +165,14 @@ export default function PipelinePage() {
         variant: "destructive",
       })
     }
+  }
+
+  const handleClosureSuccess = () => {
+    // Recarregar dados após fechamento
+    loadData()
+    setClosureModalOpen(false)
+    setClosingLead(null)
+    setClosureType(null)
   }
 
   const totalLeads = leads.length
@@ -191,7 +228,7 @@ export default function PipelinePage() {
               <Filter className="h-4 w-4" />
             </Button>
             <Button 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54]"
               onClick={() => setIsNewLeadModalOpen(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -218,7 +255,7 @@ export default function PipelinePage() {
                 <p className="text-sm text-muted-foreground">Valor Total</p>
                 <p className="text-2xl font-bold">R$ {(totalValor / 1000).toFixed(0)}k</p>
               </div>
-              <DollarSign className="h-8 w-8 text-blue-500" />
+              <DollarSign className="h-8 w-8 text-[#25D366]" />
             </div>
           </GlassCard>
 
@@ -274,6 +311,15 @@ export default function PipelinePage() {
           onOpenChange={setIsNewLeadModalOpen}
           onSuccess={loadData}
           stages={stages}
+        />
+
+        {/* Modal de Fechamento de Lead */}
+        <LeadClosureModal
+          open={closureModalOpen}
+          onOpenChange={setClosureModalOpen}
+          lead={closingLead}
+          closureType={closureType}
+          onSuccess={handleClosureSuccess}
         />
       </div>
     </div>

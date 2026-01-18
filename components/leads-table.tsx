@@ -251,7 +251,7 @@ export function LeadsTable() {
                       <TableCell>
                         <Badge 
                           className={cliente.interessado 
-                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800" 
+                            ? "bg-[#25D366]/10 dark:bg-[#25D366]/20 text-[#25D366] border-[#25D366]/30" 
                             : "bg-muted text-muted-foreground border-border"
                           }
                         >

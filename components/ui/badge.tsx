@@ -19,7 +19,9 @@ const badgeVariants = cva(
         warning:
           "border-transparent bg-orange-500 text-white shadow hover:bg-orange-600",
         info:
-          "border-transparent bg-blue-500 text-white shadow hover:bg-blue-600",
+          "border-transparent bg-[#25D366] text-white shadow hover:bg-[#128C7E]",
+        whatsapp:
+          "border-transparent bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white shadow hover:opacity-90",
       },
     },
     defaultVariants: {

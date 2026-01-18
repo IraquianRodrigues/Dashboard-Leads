@@ -26,6 +26,12 @@ export interface Cliente {
   ultima_interacao?: string | null
   stage_id?: number | null
   score?: number
+  // Campos de fechamento
+  motivo_perda?: string | null
+  valor_fechado?: number | null
+  data_inicio_contrato?: string | null
+  duracao_contrato_meses?: number | null
+  is_cliente_ativo?: boolean
 }
 
 // Estágio do Pipeline

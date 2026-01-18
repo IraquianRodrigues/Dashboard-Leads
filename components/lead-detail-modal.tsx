@@ -149,7 +149,7 @@ export function LeadDetailModal({
   const getActivityColor = (tipo: string) => {
     switch (tipo) {
       case "call":
-        return "bg-blue-500"
+        return "bg-[#25D366]"
       case "email":
         return "bg-purple-500"
       case "whatsapp":

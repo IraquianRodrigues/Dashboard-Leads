@@ -229,7 +229,7 @@ export default function TasksPage() {
                 <div className="flex items-center gap-1 mt-1">
                   <div className="h-1.5 w-16 bg-muted rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-blue-500 transition-all"
+                      className="h-full bg-[#25D366] transition-all"
                       style={{ width: `${totalTasks > 0 ? (emAndamento / totalTasks) * 100 : 0}%` }}
                     />
                   </div>
@@ -238,7 +238,7 @@ export default function TasksPage() {
                   </span>
                 </div>
               </div>
-              <Clock className="h-8 w-8 text-blue-500" />
+              <Clock className="h-8 w-8 text-[#25D366]" />
             </div>
           </GlassCard>
 

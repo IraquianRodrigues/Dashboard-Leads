@@ -119,7 +119,7 @@ export function Sidebar() {
             "flex items-center gap-3 px-6 py-6 relative",
             isCollapsed && "justify-center px-4"
           )}>
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 flex-shrink-0">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white shadow-lg shadow-[#25D366]/20 flex-shrink-0">
               <MessageCircle className="h-6 w-6" />
             </div>
             {!isCollapsed && (
@@ -132,7 +132,7 @@ export function Sidebar() {
             {/* Botão de Toggle */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-110 transition-all z-10"
+              className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 items-center justify-center rounded-full bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white shadow-md hover:shadow-lg hover:scale-110 transition-all z-10"
               title={isCollapsed ? "Expandir sidebar" : "Minimizar sidebar"}
             >
               {isCollapsed ? (
@@ -158,7 +158,7 @@ export function Sidebar() {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 relative",
                     isActive
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/40"
+                      ? "bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white shadow-lg shadow-[#25D366]/40"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     isCollapsed && "justify-center px-0"
                   )}
@@ -177,7 +177,7 @@ export function Sidebar() {
               <div className="px-4 py-4 space-y-3">
                 {/* User Info */}
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-md flex-shrink-0">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white font-semibold text-sm shadow-md flex-shrink-0">
                     {initials}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -208,7 +208,7 @@ export function Sidebar() {
               <div className="px-4 py-4 space-y-3 flex flex-col items-center">
                 <button
                   onClick={() => setIsCollapsed(false)}
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-md hover:scale-110 transition-transform"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white font-semibold text-sm shadow-md hover:scale-110 transition-transform"
                   title="Expandir"
                 >
                   {initials}

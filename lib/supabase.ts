@@ -845,3 +845,134 @@ export async function createLead(leadData: Omit<Cliente, 'id' | 'created_at'>): 
     return null
   }
 }
+
+// ==================== LEAD CLOSURE ====================
+
+import type { LeadClosureWonData, LeadClosureLostData } from "./lead-closure-types"
+
+/**
+ * Fecha um lead como ganho (convertido em cliente)
+ */
+export async function closeLeadAsWon(leadId: number, data: LeadClosureWonData): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    
+    // 1. Atualizar lead
+    const { error: updateError } = await supabase
+      .from(TABLE_NAME)
+      .update({
+        valor_fechado: data.valor_fechado,
+        data_inicio_contrato: data.data_inicio_contrato,
+        duracao_contrato_meses: data.duracao_contrato_meses,
+        is_cliente_ativo: true,
+        data_conversao: new Date().toISOString(),
+      })
+      .eq("id", leadId)
+
+    if (updateError) {
+      console.error("Erro ao atualizar lead como ganho:", updateError)
+      return false
+    }
+
+    // 2. Criar atividade de fechamento
+    await createActivity(
+      leadId,
+      "stage_change",
+      "🎉 Negócio Fechado!",
+      `Lead convertido em cliente. Valor: R$ ${data.valor_fechado.toFixed(2)}`,
+      {
+        tipo_fechamento: "ganho",
+        valor_fechado: data.valor_fechado,
+        data_inicio_contrato: data.data_inicio_contrato,
+        duracao_meses: data.duracao_contrato_meses,
+      }
+    )
+
+    // 3. Criar tarefa de onboarding (se solicitado)
+    if (data.criar_onboarding) {
+      const dataVencimento = new Date()
+      dataVencimento.setDate(dataVencimento.getDate() + 2) // +2 dias
+
+      await createTask({
+        lead_id: leadId,
+        titulo: "Agendar reunião de kickoff",
+        descricao: "Reunião inicial para alinhamento e início do projeto",
+        data_vencimento: dataVencimento.toISOString(),
+        prioridade: "alta",
+        status: "pendente",
+      })
+    }
+
+    // 4. TODO: Enviar mensagem de boas-vindas (se solicitado)
+    // if (data.enviar_mensagem) {
+    //   await sendWelcomeMessage(leadId)
+    // }
+
+    return true
+  } catch (exception) {
+    console.error("Exceção ao fechar lead como ganho:", exception)
+    return false
+  }
+}
+
+/**
+ * Fecha um lead como perdido
+ */
+export async function closeLeadAsLost(leadId: number, data: LeadClosureLostData): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    
+    // Preparar motivo final
+    const motivoFinal = data.motivo_perda === 'outro' && data.motivo_outro
+      ? `outro: ${data.motivo_outro}`
+      : data.motivo_perda
+
+    // 1. Atualizar lead
+    const { error: updateError } = await supabase
+      .from(TABLE_NAME)
+      .update({
+        motivo_perda: motivoFinal,
+        observacoes: data.observacoes || null,
+      })
+      .eq("id", leadId)
+
+    if (updateError) {
+      console.error("Erro ao atualizar lead como perdido:", updateError)
+      return false
+    }
+
+    // 2. Criar atividade de fechamento
+    await createActivity(
+      leadId,
+      "stage_change",
+      "😔 Negócio Perdido",
+      `Motivo: ${motivoFinal}${data.observacoes ? `\n\nObservações: ${data.observacoes}` : ''}`,
+      {
+        tipo_fechamento: "perdido",
+        motivo_perda: motivoFinal,
+        observacoes: data.observacoes,
+      }
+    )
+
+    // 3. Criar tarefa de recontato (se solicitado)
+    if (data.agendar_recontato) {
+      const diasRecontato = data.dias_recontato || 90
+      const dataVencimento = new Date()
+      dataVencimento.setDate(dataVencimento.getDate() + diasRecontato)
+
+      await createTask({
+        lead_id: leadId,
+        titulo: "Recontatar lead perdido",
+        descricao: `Tentar reengajar lead que foi perdido por: ${motivoFinal}`,
+        data_vencimento: dataVencimento.toISOString(),
+        prioridade: "baixa",
+        status: "pendente",
+      })
+    }
+
+    return true
+  } catch (exception) {
+    console.error("Exceção ao fechar lead como perdido:", exception)
+    return false
+  }
+}

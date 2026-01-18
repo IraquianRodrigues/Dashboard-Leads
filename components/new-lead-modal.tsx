@@ -222,7 +222,7 @@ export function NewLeadModal({ open, onOpenChange, onSuccess, stages }: NewLeadM
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54]"
               disabled={loading}
             >
               {loading ? "Criando..." : "Criar Lead"}

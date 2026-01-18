@@ -60,7 +60,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         <div className="flex items-center justify-between">
           {/* Logo and Title */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
+            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white shadow-lg shadow-[#25D366]/20">
               <MessageCircle className="h-6 w-6" />
             </div>
             <div>
@@ -73,7 +73,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           <div className="flex items-center gap-3">
             {/* User Avatar and Info */}
             <div className="hidden md:flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/50 border border-border/50">
-              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-semibold text-sm shadow-md">
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white font-semibold text-sm shadow-md">
                 {initials}
               </div>
               <div className="text-left">

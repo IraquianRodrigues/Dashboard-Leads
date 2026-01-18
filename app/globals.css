@@ -37,6 +37,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0); /* Cinza claro */
   --sidebar-ring: oklch(0.708 0 0); /* Cinza médio */
+  
+  /* WhatsApp Colors */
+  --whatsapp-green: #25D366;
+  --whatsapp-dark-green: #128C7E;
+  --whatsapp-teal: #075E54;
+  --whatsapp-light-blue: #34B7F1;
 }
 
 .dark {
@@ -216,9 +222,9 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  /* Premium gradients - OdontoVida Blue-Indigo */
+  /* Premium gradients - WhatsApp Green */
   .gradient-primary {
-    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   }
   
   .gradient-card {
@@ -226,7 +232,7 @@
   }
   
   .gradient-text {
-    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -247,7 +253,7 @@
   }
   
   .hover-glow:hover {
-    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 20px rgba(37, 211, 102, 0.3);
   }
   
   /* Smooth transitions */
@@ -262,7 +268,7 @@
   --glass-border: oklch(0.25 0 0 / 0.3);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   
-  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  --gradient-primary: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   --gradient-card: linear-gradient(135deg, var(--card) 0%, oklch(0.14 0 0) 100%);
   
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);

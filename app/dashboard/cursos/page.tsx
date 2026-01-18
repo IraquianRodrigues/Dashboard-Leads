@@ -257,7 +257,7 @@ export default function CursosPage() {
                 <p className="text-sm text-muted-foreground">Valor Total</p>
                 <p className="text-2xl font-bold">R$ {(valorTotal / 1000).toFixed(0)}k</p>
               </div>
-              <DollarSign className="h-8 w-8 text-blue-500" />
+              <DollarSign className="h-8 w-8 text-[#25D366]" />
             </div>
           </GlassCard>
 
@@ -327,7 +327,7 @@ export default function CursosPage() {
                     <div className="flex items-center gap-2">
                       <Badge 
                         className={curso.ativo 
-                          ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 font-medium" 
+                          ? "bg-[#25D366]/10 dark:bg-[#25D366]/20 text-[#25D366] border-[#25D366]/30 font-medium" 
                           : "bg-muted text-muted-foreground border-border"
                         }
                       >
