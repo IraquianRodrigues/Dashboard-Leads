@@ -43,6 +43,13 @@ import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { getCurrentUser } from "@/lib/supabase"
 import { EmptyState } from "@/components/ui/empty-state"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function CursosPage() {
   const [cursos, setCursos] = useState<Curso[]>([])
@@ -333,13 +340,50 @@ export default function CursosPage() {
                       >
                         {curso.ativo ? "Ativo" : "Inativo"}
                       </Badge>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <MoreVertical className="h-3 w-3" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleOpenDialog(curso)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            // Duplicar curso
+                            setFormData({
+                              nome: `${curso.nome} (Cópia)`,
+                              descricao: curso.descricao || "",
+                              valor: curso.valor?.toString() || "",
+                              duracao_media: curso.duracao_media || "",
+                              categoria: curso.categoria || "",
+                              ativo: curso.ativo,
+                            })
+                            setEditingCurso(null)
+                            setIsDialogOpen(true)
+                          }}>
+                            <BookOpen className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setDeletingCurso(curso)
+                              setIsDeleteDialogOpen(true)
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Deletar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 
@@ -362,30 +406,6 @@ export default function CursosPage() {
                         <span>{curso.duracao_media}</span>
                       </div>
                     )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleOpenDialog(curso)}
-                    >
-                      <Pencil className="h-3 w-3 mr-2" />
-                      Editar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => {
-                        setDeletingCurso(curso)
-                        setIsDeleteDialogOpen(true)
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
                   </div>
                 </div>
               </GlassCard>

@@ -270,6 +270,13 @@ import type {
   DashboardMetrics,
   LeadsPorEstagio,
   LeadCompleto,
+  LeadNote,
+  LeadNoteWithUser,
+  CreateNoteInput,
+  UpdateNoteInput,
+  NoteMention,
+  LeadCourseInterest,
+  LatestCourseInterest,
 } from "./types"
 
 // ==================== PIPELINE STAGES ====================
@@ -974,5 +981,373 @@ export async function closeLeadAsLost(leadId: number, data: LeadClosureLostData)
   } catch (exception) {
     console.error("Exceção ao fechar lead como perdido:", exception)
     return false
+  }
+}
+
+// ==================== LEAD NOTES ====================
+
+/**
+ * Buscar notas de um lead
+ */
+export async function getLeadNotes(leadId: number): Promise<LeadNoteWithUser[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("lead_notes")
+      .select("*")
+      .eq("lead_id", leadId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Erro ao buscar notas do lead:", error)
+      return []
+    }
+
+    // Organizar notas com threading
+    const notes = (data as unknown as LeadNoteWithUser[]) || []
+    const notesMap = new Map<number, LeadNoteWithUser>()
+    const rootNotes: LeadNoteWithUser[] = []
+
+    // Primeiro, criar mapa de todas as notas
+    notes.forEach((note) => {
+      notesMap.set(note.id, { ...note, replies: [] })
+    })
+
+    // Depois, organizar hierarquia
+    notes.forEach((note) => {
+      const noteWithReplies = notesMap.get(note.id)!
+      if (note.parent_note_id) {
+        const parent = notesMap.get(note.parent_note_id)
+        if (parent) {
+          if (!parent.replies) parent.replies = []
+          parent.replies.push(noteWithReplies)
+        }
+      } else {
+        rootNotes.push(noteWithReplies)
+      }
+    })
+
+    return rootNotes
+  } catch (exception) {
+    console.error("Exceção ao buscar notas do lead:", exception)
+    return []
+  }
+}
+
+/**
+ * Criar nova nota
+ */
+export async function createLeadNote(input: CreateNoteInput): Promise<LeadNote | null> {
+  try {
+    const supabase = createClient()
+    const { data: userData } = await supabase.auth.getUser()
+
+    if (!userData?.user) {
+      console.error("Usuário não autenticado")
+      return null
+    }
+
+    const { data, error } = await supabase
+      .from("lead_notes")
+      .insert([{
+        lead_id: input.lead_id,
+        user_id: userData.user.id,
+        content: input.content,
+        is_important: input.is_important || false,
+        is_private: input.is_private || false,
+        parent_note_id: input.parent_note_id || null,
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Erro ao criar nota:", error)
+      return null
+    }
+
+    // Extrair e criar menções
+    if (data) {
+      const mentions = extractMentions(input.content)
+      if (mentions.length > 0) {
+        await createNoteMentions(data.id, mentions)
+      }
+
+      // Criar atividade no lead
+      await createActivity(
+        input.lead_id,
+        "note",
+        "Nova nota adicionada",
+        input.content.substring(0, 100) + (input.content.length > 100 ? "..." : "")
+      )
+    }
+
+    return data
+  } catch (exception) {
+    console.error("Exceção ao criar nota:", exception)
+    return null
+  }
+}
+
+/**
+ * Atualizar nota existente
+ */
+export async function updateLeadNote(
+  noteId: number,
+  input: UpdateNoteInput
+): Promise<LeadNote | null> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("lead_notes")
+      .update(input)
+      .eq("id", noteId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Erro ao atualizar nota:", error)
+      return null
+    }
+
+    // Atualizar menções se o conteúdo mudou
+    if (input.content && data) {
+      await deleteNoteMentions(noteId)
+      const mentions = extractMentions(input.content)
+      if (mentions.length > 0) {
+        await createNoteMentions(noteId, mentions)
+      }
+    }
+
+    return data
+  } catch (exception) {
+    console.error("Exceção ao atualizar nota:", exception)
+    return null
+  }
+}
+
+/**
+ * Deletar nota (soft delete)
+ */
+export async function deleteLeadNote(noteId: number): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("lead_notes")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", noteId)
+
+    if (error) {
+      console.error("Erro ao deletar nota:", error)
+      return false
+    }
+
+    return true
+  } catch (exception) {
+    console.error("Exceção ao deletar nota:", exception)
+    return false
+  }
+}
+
+/**
+ * Extrair menções (@usuario) do texto
+ */
+function extractMentions(content: string): string[] {
+  const mentionRegex = /@(\w+)/g
+  const mentions: string[] = []
+  let match
+
+  while ((match = mentionRegex.exec(content)) !== null) {
+    mentions.push(match[1])
+  }
+
+  return mentions
+}
+
+/**
+ * Criar menções na tabela note_mentions
+ */
+async function createNoteMentions(noteId: number, usernames: string[]): Promise<void> {
+  try {
+    const supabase = createClient()
+    
+    // Buscar IDs dos usuários mencionados (por email)
+    const { data: users } = await supabase
+      .from("auth.users")
+      .select("id")
+      .in("email", usernames.map(u => `${u}@example.com`)) // Ajustar conforme necessário
+
+    if (!users || users.length === 0) return
+
+    const mentions = users.map(user => ({
+      note_id: noteId,
+      mentioned_user_id: user.id,
+    }))
+
+    await supabase.from("note_mentions").insert(mentions)
+  } catch (exception) {
+    console.error("Erro ao criar menções:", exception)
+  }
+}
+
+/**
+ * Deletar menções de uma nota
+ */
+async function deleteNoteMentions(noteId: number): Promise<void> {
+  try {
+    const supabase = createClient()
+    await supabase.from("note_mentions").delete().eq("note_id", noteId)
+  } catch (exception) {
+    console.error("Erro ao deletar menções:", exception)
+  }
+}
+
+/**
+ * Buscar menções de um usuário
+ */
+export async function getUserMentions(userId: string): Promise<NoteMention[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("note_mentions")
+      .select(`
+        *,
+        note:lead_notes!note_id(*)
+      `)
+      .eq("mentioned_user_id", userId)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Erro ao buscar menções do usuário:", error)
+      return []
+    }
+
+    return (data as unknown as NoteMention[]) || []
+  } catch (exception) {
+    console.error("Exceção ao buscar menções do usuário:", exception)
+    return []
+  }
+}
+
+// ==================== COURSE INTERESTS HISTORY ====================
+
+/**
+ * Buscar histórico de interesses de um lead
+ */
+export async function getLeadCourseInterests(leadId: number): Promise<LeadCourseInterest[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("lead_course_interests")
+      .select("*")
+      .eq("lead_id", leadId)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Erro ao buscar interesses do lead:", error)
+      return []
+    }
+
+    return data || []
+  } catch (exception) {
+    console.error("Exceção ao buscar interesses do lead:", exception)
+    return []
+  }
+}
+
+/**
+ * Registrar novo interesse em curso
+ */
+export async function createCourseInterest(
+  leadId: number,
+  cursoNome: string,
+  cursoId?: number,
+  origem?: string,
+  metadata?: Record<string, any>
+): Promise<LeadCourseInterest | null> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("lead_course_interests")
+      .insert([{
+        lead_id: leadId,
+        curso_nome: cursoNome,
+        curso_id: cursoId || null,
+        origem: origem || null,
+        metadata: metadata || null,
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Erro ao criar interesse:", error)
+      return null
+    }
+
+    // Atualizar o campo produto_interesse do lead com o mais recente
+    await supabase
+      .from(TABLE_NAME)
+      .update({ produto_interesse: cursoNome })
+      .eq("id", leadId)
+
+    // Criar atividade
+    await createActivity(
+      leadId,
+      "note",
+      "Novo interesse registrado",
+      `Interesse em: ${cursoNome}`
+    )
+
+    return data
+  } catch (exception) {
+    console.error("Exceção ao criar interesse:", exception)
+    return null
+  }
+}
+
+/**
+ * Buscar interesse mais recente de um lead
+ */
+export async function getLatestCourseInterest(leadId: number): Promise<LatestCourseInterest | null> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("v_latest_course_interest")
+      .select("*")
+      .eq("lead_id", leadId)
+      .single()
+
+    if (error) {
+      console.error("Erro ao buscar interesse mais recente:", error)
+      return null
+    }
+
+    return data
+  } catch (exception) {
+    console.error("Exceção ao buscar interesse mais recente:", exception)
+    return null
+  }
+}
+
+/**
+ * Buscar todos os interesses mais recentes (para dashboard)
+ */
+export async function getAllLatestCourseInterests(): Promise<LatestCourseInterest[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from("v_latest_course_interest")
+      .select("*")
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Erro ao buscar interesses mais recentes:", error)
+      return []
+    }
+
+    return data || []
+  } catch (exception) {
+    console.error("Exceção ao buscar interesses mais recentes:", exception)
+    return []
   }
 }

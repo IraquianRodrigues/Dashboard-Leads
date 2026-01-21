@@ -67,6 +67,78 @@ export interface LeadActivityWithLead extends LeadActivity {
   }
 }
 
+// Nota do Lead
+export interface LeadNote {
+  id: number
+  lead_id: number
+  user_id: string
+  content: string
+  is_important: boolean
+  is_private: boolean
+  parent_note_id?: number | null
+  deleted_at?: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Nota com informações do usuário
+export interface LeadNoteWithUser extends LeadNote {
+  user?: {
+    id: string
+    email: string
+  }
+  replies?: LeadNoteWithUser[]
+  mentions?: NoteMention[]
+}
+
+// Menção em nota
+export interface NoteMention {
+  id: number
+  note_id: number
+  mentioned_user_id: string
+  created_at: string
+  mentioned_user?: {
+    id: string
+    email: string
+  }
+}
+
+// Input para criar nota
+export interface CreateNoteInput {
+  lead_id: number
+  content: string
+  is_important?: boolean
+  is_private?: boolean
+  parent_note_id?: number | null
+}
+
+// Input para atualizar nota
+export interface UpdateNoteInput {
+  content?: string
+  is_important?: boolean
+  is_private?: boolean
+}
+
+// Histórico de Interesses em Cursos
+export interface LeadCourseInterest {
+  id: number
+  lead_id: number
+  curso_nome: string
+  curso_id?: number | null
+  origem?: string | null
+  metadata?: Record<string, any> | null
+  created_at: string
+}
+
+// Interesse mais recente (da view)
+export interface LatestCourseInterest {
+  lead_id: number
+  curso_nome: string
+  curso_id?: number | null
+  origem?: string | null
+  created_at: string
+}
+
 // Tarefa
 export interface Task {
   id: number

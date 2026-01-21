@@ -40,6 +40,8 @@ import {
   X,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { LeadNotes } from "@/components/lead-notes"
+import { CourseInterests } from "@/components/course-interests"
 
 interface LeadDetailModalProps {
   leadId: number | null
@@ -198,8 +200,10 @@ export function LeadDetailModal({
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="info">Informações</TabsTrigger>
+            <TabsTrigger value="notes">Notas</TabsTrigger>
+            <TabsTrigger value="interests">Interesses</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="tasks">Tarefas</TabsTrigger>
             <TabsTrigger value="communication">Comunicação</TabsTrigger>
@@ -335,6 +339,32 @@ export function LeadDetailModal({
                     </div>
                   )}
                 </div>
+              )}
+            </TabsContent>
+
+            {/* Tab: Notas */}
+            <TabsContent value="notes" className="mt-0">
+              {loading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-24 bg-muted animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <LeadNotes leadId={leadId!} />
+              )}
+            </TabsContent>
+
+            {/* Tab: Interesses */}
+            <TabsContent value="interests" className="mt-0">
+              {loading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-20 bg-muted animate-pulse rounded" />
+                  ))}
+                </div>
+              ) : (
+                <CourseInterests leadId={leadId!} />
               )}
             </TabsContent>
 
