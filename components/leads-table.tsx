@@ -20,6 +20,7 @@ import {
 import { ChevronLeft, ChevronRight, Lock, Unlock, Filter, MessageCircle, Phone, Search, X } from "lucide-react"
 import { getClientes, updateClienteStatus, type Cliente } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 const ITEMS_PER_PAGE = 20
 
@@ -119,18 +120,21 @@ export function LeadsTable() {
   const hasActiveFilters = searchQuery || statusFilter !== "all" || interestFilter !== "all" || showFollowUpFilter
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex flex-col gap-4">
+    <Card className="shadow-none border-border">
+      <CardHeader className="border-b border-border/50 bg-muted/20 pb-4">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--whatsapp-green)] to-[var(--whatsapp-dark-green)] text-white shadow-md shadow-[var(--whatsapp-green)]/20">
-                <MessageCircle className="h-5 w-5" />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#25D366]/10 text-[#25D366]">
+                <MessageCircle className="h-4 w-4" />
               </div>
-              <span className="text-xl">Clientes do WhatsApp</span>
+              <div>
+                <CardTitle className="text-lg font-semibold">Leads do WhatsApp</CardTitle>
+                <p className="text-xs text-muted-foreground">Gerencie seus contatos e conversas</p>
+              </div>
             </div>
             <Badge variant="secondary" className="font-medium">
-              {filteredClientes.length} {filteredClientes.length === 1 ? "cliente" : "clientes"}
+              {filteredClientes.length} {filteredClientes.length === 1 ? "lead" : "leads"}
             </Badge>
           </div>
 
@@ -146,14 +150,14 @@ export function LeadsTable() {
                   setSearchQuery(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="pl-9 pr-9 h-10"
+                className="pl-9 pr-9 h-9 bg-background/50"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </button>
               )}
             </div>
@@ -162,21 +166,24 @@ export function LeadsTable() {
             <div className="flex gap-2 flex-wrap">
               {/* Status Filter */}
               <Button
-                variant={statusFilter !== "all" ? "default" : "outline"}
+                variant={statusFilter !== "all" ? "secondary" : "outline"}
                 size="sm"
                 onClick={() => {
                   setStatusFilter(statusFilter === "all" ? "active" : statusFilter === "active" ? "locked" : "all")
                   setCurrentPage(1)
                 }}
-                className={statusFilter !== "all" ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)]" : ""}
+                className={cn(
+                  "h-9 text-xs",
+                  statusFilter !== "all" && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                )}
               >
-                <Filter className="h-4 w-4 mr-2" />
+                <Filter className="h-3 w-3 mr-2" />
                 {statusFilter === "all" ? "Status" : statusFilter === "active" ? "Ativos" : "Travados"}
               </Button>
 
               {/* Interest Filter */}
               <Button
-                variant={interestFilter !== "all" ? "default" : "outline"}
+                variant={interestFilter !== "all" ? "secondary" : "outline"}
                 size="sm"
                 onClick={() => {
                   setInterestFilter(
@@ -188,100 +195,112 @@ export function LeadsTable() {
                   )
                   setCurrentPage(1)
                 }}
-                className={interestFilter !== "all" ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)]" : ""}
+                className={cn(
+                  "h-9 text-xs",
+                  interestFilter !== "all" && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                )}
               >
                 {interestFilter === "all" ? "Interesse" : interestFilter === "interested" ? "Interessados" : "Sem Interesse"}
               </Button>
 
               {/* Follow-up Filter */}
               <Button
-                variant={showFollowUpFilter ? "default" : "outline"}
+                variant={showFollowUpFilter ? "secondary" : "outline"}
                 size="sm"
                 onClick={() => {
                   setShowFollowUpFilter(!showFollowUpFilter)
                   setCurrentPage(1)
                 }}
-                className={showFollowUpFilter ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)]" : ""}
+                 className={cn(
+                  "h-9 text-xs",
+                  showFollowUpFilter && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                )}
               >
                 Follow Up
               </Button>
 
               {/* Clear Filters */}
               {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-muted-foreground">
-                  <X className="h-4 w-4 mr-2" />
+                <Button variant="ghost" size="sm" onClick={clearAllFilters} className="h-9 text-xs text-muted-foreground hover:text-destructive">
+                  <X className="h-3 w-3 mr-2" />
                   Limpar
                 </Button>
               )}
             </div>
           </div>
-        </CardTitle>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[var(--whatsapp-green)] mb-4"></div>
-            <div className="text-muted-foreground text-sm">Carregando clientes...</div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-zinc-100 mb-4"></div>
+            <div className="text-muted-foreground text-sm">Carregando dados...</div>
           </div>
         ) : (
           <>
-            <div className="rounded-lg border overflow-hidden">
+            <div className="border-b border-border">
               <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-muted/50 transition-colors">
-                    <TableHead className="font-semibold">Nome</TableHead>
-                    <TableHead className="font-semibold">Telefone</TableHead>
-                    <TableHead className="font-semibold">Interessado</TableHead>
-                    <TableHead className="font-semibold">Produto</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold">Follow Up</TableHead>
-                    <TableHead className="text-right font-semibold">Ações</TableHead>
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="font-medium text-xs uppercase tracking-wider text-muted-foreground h-10">Lead</TableHead>
+                    <TableHead className="font-medium text-xs uppercase tracking-wider text-muted-foreground h-10">Contato</TableHead>
+                    <TableHead className="font-medium text-xs uppercase tracking-wider text-muted-foreground h-10">Interesse</TableHead>
+                    <TableHead className="font-medium text-xs uppercase tracking-wider text-muted-foreground h-10">Produto</TableHead>
+                    <TableHead className="font-medium text-xs uppercase tracking-wider text-muted-foreground h-10">Status</TableHead>
+                    <TableHead className="font-medium text-xs uppercase tracking-wider text-muted-foreground h-10">Follow Up</TableHead>
+                    <TableHead className="text-right font-medium text-xs uppercase tracking-wider text-muted-foreground h-10 w-[100px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {currentClientes.map((cliente) => (
-                    <TableRow key={cliente.id} className="hover:bg-muted/30 transition-colors duration-200">
-                      <TableCell className="font-medium">{cliente.nome || "Sem nome"}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-[var(--whatsapp-green)]" />
-                          <span className="text-sm font-medium">{cliente.telefone || "Sem telefone"}</span>
+                    <TableRow key={cliente.id} className="hover:bg-muted/30 transition-colors border-border/50">
+                      <TableCell className="font-medium text-sm py-3">{cliente.nome || "Sem nome"}</TableCell>
+                      <TableCell className="py-3">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          <span>{cliente.telefone || "Sem telefone"}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-3">
                         <Badge 
-                          className={cliente.interessado 
-                            ? "bg-[#25D366]/10 dark:bg-[#25D366]/20 text-[#25D366] border-[#25D366]/30" 
-                            : "bg-muted text-muted-foreground border-border"
-                          }
+                          variant="outline"
+                          className={cn("font-normal", cliente.interessado 
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800" 
+                            : "text-muted-foreground"
+                          )}
                         >
                           {cliente.interessado ? "Sim" : "Não"}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <div className="max-w-[150px] truncate" title={cliente.produto_interesse || ""}>
-                          {cliente.produto_interesse || "Não informado"}
-                        </div>
+                      <TableCell className="py-3">
+                        <span className="text-sm text-muted-foreground max-w-[150px] truncate block" title={cliente.produto_interesse || ""}>
+                          {cliente.produto_interesse || "-"}
+                        </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-3">
                         <Badge
-                          className={!cliente.trava 
-                            ? "bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800" 
-                            : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
-                          }
+                          variant="outline"
+                          className={cn("font-normal", !cliente.trava 
+                            ? "bg-emerald-100/50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
+                            : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800"
+                          )}
                         >
-                          {!cliente.trava ? "Ativo" : "Travado"}
+                          {!cliente.trava ? "Ativo" : "Pausado"}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={cliente.follow_up > 1 ? "default" : "outline"}>{cliente.follow_up}</Badge>
+                      <TableCell className="py-3">
+                         {cliente.follow_up > 0 && (
+                            <Badge variant="secondary" className="font-normal bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                                {cliente.follow_up}x
+                            </Badge>
+                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right py-3">
                         <div className="flex items-center justify-end gap-2">
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="h-9 w-9 p-0 bg-transparent hover:bg-[var(--whatsapp-green)] hover:text-white hover:scale-110 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-[#25D366] hover:bg-[#25D366]/10"
                             onClick={() => {
                               const phoneNumber = cliente.telefone?.replace(/\D/g, "") // Remove non-digits
                               if (phoneNumber) {
@@ -296,7 +315,7 @@ export function LeadsTable() {
 
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-9 w-9 p-0 bg-transparent hover:bg-accent hover:scale-110 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground">
                                 {cliente.trava ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                               </Button>
                             </AlertDialogTrigger>
@@ -328,10 +347,9 @@ export function LeadsTable() {
             </div>
 
             {/* Paginação */}
-            <div className="flex items-center justify-between space-x-2 py-4 border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                Mostrando {startIndex + 1} a {Math.min(endIndex, filteredClientes.length)} de {filteredClientes.length}{" "}
-                {showFollowUpFilter ? "clientes com follow up > 1" : "clientes do WhatsApp"}
+            <div className="flex items-center justify-between p-4 bg-muted/20">
+              <div className="text-xs text-muted-foreground">
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredClientes.length)} de {filteredClientes.length}
               </div>
               <div className="flex items-center space-x-2">
                 <Button
@@ -339,9 +357,9 @@ export function LeadsTable() {
                   size="sm"
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="hover:bg-accent transition-colors duration-200"
+                  className="h-8 px-2 text-xs"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-3 w-3 mr-1" />
                   Anterior
                 </Button>
 
@@ -361,13 +379,13 @@ export function LeadsTable() {
                     return (
                       <Button
                         key={pageNumber}
-                        variant={currentPage === pageNumber ? "default" : "outline"}
+                        variant={currentPage === pageNumber ? "secondary" : "ghost"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNumber)}
-                        className={`h-8 w-8 p-0 transition-all duration-200 ${
+                        className={`h-8 w-8 p-0 text-xs ${
                           currentPage === pageNumber 
-                            ? "bg-[var(--whatsapp-green)] hover:bg-[var(--whatsapp-dark-green)]" 
-                            : "hover:bg-accent"
+                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" 
+                            : "text-muted-foreground"
                         }`}
                       >
                         {pageNumber}
@@ -381,10 +399,10 @@ export function LeadsTable() {
                   size="sm"
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  className="hover:bg-accent transition-colors duration-200"
+                  className="h-8 px-2 text-xs"
                 >
                   Próxima
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
               </div>
             </div>

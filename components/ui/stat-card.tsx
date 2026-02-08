@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface StatCardProps {
   title: string
@@ -16,29 +17,19 @@ interface StatCardProps {
 
 const variantStyles = {
   default: {
-    iconBg: "bg-muted/50",
-    iconColor: "text-foreground",
-    border: "border-l-border",
+    iconColor: "text-zinc-500 dark:text-zinc-400",
   },
   primary: {
-    iconBg: "bg-gradient-to-br from-[#25D366]/20 to-[#128C7E]/20",
     iconColor: "text-[#25D366]",
-    border: "border-l-[#25D366]",
   },
   success: {
-    iconBg: "bg-green-50 dark:bg-green-950/30",
-    iconColor: "text-green-500",
-    border: "border-l-green-500",
+    iconColor: "text-emerald-500",
   },
   warning: {
-    iconBg: "bg-orange-50 dark:bg-orange-950/30",
-    iconColor: "text-orange-500",
-    border: "border-l-orange-500",
+    iconColor: "text-amber-500",
   },
   danger: {
-    iconBg: "bg-red-50 dark:bg-red-950/30",
     iconColor: "text-red-500",
-    border: "border-l-red-500",
   },
 }
 
@@ -54,44 +45,37 @@ export function StatCard({
   const styles = variantStyles[variant]
 
   return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-xl border border-l-4 bg-card p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
-        styles.border,
-        className
-      )}
-    >
-      <div className="flex items-center justify-between space-y-0 pb-2">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+    <Card className={cn("overflow-hidden", className)}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {title}
+        </CardTitle>
         {icon && (
-          <div
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110",
-              styles.iconBg
-            )}
-          >
-            <div className={cn("h-5 w-5", styles.iconColor)}>{icon}</div>
+          <div className={cn("h-4 w-4", styles.iconColor)}>
+            {icon}
           </div>
         )}
-      </div>
-      <div className="space-y-1">
-        <div className="text-3xl font-bold text-foreground">{value}</div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold tracking-tight">{value}</div>
         {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
         {trend && (
-          <div className="flex items-center gap-1 text-xs font-medium">
+          <div className="flex items-center gap-1 mt-2 text-xs font-medium">
             <span
               className={cn(
-                trend.value >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                trend.value >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
               )}
             >
-              {trend.value >= 0 ? "↑" : "↓"} {Math.abs(trend.value)}%
+              {trend.value > 0 ? "+" : ""}{trend.value}%
             </span>
-            <span className="text-muted-foreground">{trend.label}</span>
+            <span className="text-muted-foreground/60 ml-1">
+              {trend.label}
+            </span>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

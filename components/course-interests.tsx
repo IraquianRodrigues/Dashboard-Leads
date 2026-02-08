@@ -172,16 +172,12 @@ export function CourseInterests({ leadId }: CourseInterestsProps) {
             >
               <TimelineContent
                 title={interest.curso_nome}
-                description={
-                  <div className="flex items-center gap-2 mt-1">
-                    {getOrigemBadge(interest.origem)}
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatTimestamp(interest.created_at)}
-                    </span>
-                  </div>
-                }
-              />
+                timestamp={formatTimestamp(interest.created_at)}
+              >
+                <div className="flex items-center gap-2 mt-1">
+                  {getOrigemBadge(interest.origem)}
+                </div>
+              </TimelineContent>
             </TimelineItem>
           ))}
         </Timeline>

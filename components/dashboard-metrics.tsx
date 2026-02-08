@@ -71,14 +71,9 @@ export function DashboardMetrics() {
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white shadow-lg shadow-[#25D366]/20">
-              <MessageCircle className="h-6 w-6" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight">Dashboard CRM</h2>
-              <p className="text-muted-foreground text-sm">Acompanhe seus leads</p>
-            </div>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground text-sm">Visão geral do sistema</p>
           </div>
         </div>
 
@@ -86,7 +81,7 @@ export function DashboardMetrics() {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="h-32 rounded-xl border bg-card animate-pulse"
+              className="h-32 rounded-lg border bg-card animate-pulse"
             />
           ))}
         </div>
@@ -97,21 +92,15 @@ export function DashboardMetrics() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white shadow-lg shadow-[#25D366]/20">
-            <MessageCircle className="h-6 w-6" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Dashboard CRM</h2>
-            <p className="text-muted-foreground text-sm">Acompanhe seus leads em tempo real</p>
-          </div>
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground text-sm">Visão geral dos seus leads e métricas.</p>
         </div>
         {!loading && clientes.length > 0 && (
-          <div className="text-right hidden md:block">
-            <div className="text-sm text-muted-foreground">Última atualização</div>
-            <div className="text-xs text-muted-foreground">
-              {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-            </div>
+          <div className="hidden md:block">
+             <span className="inline-flex items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/10">
+                Atualizado: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
           </div>
         )}
       </div>

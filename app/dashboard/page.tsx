@@ -65,17 +65,13 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4 animate-in fade-in duration-500">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-t-2 border-[var(--whatsapp-green)] mx-auto"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <MessageCircle className="h-7 w-7 text-[var(--whatsapp-green)] animate-pulse" />
-            </div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-t-2 border-zinc-900 dark:border-white mx-auto"></div>
           </div>
           <div>
-            <p className="text-foreground font-semibold text-lg">Carregando dashboard...</p>
-            <p className="text-sm text-muted-foreground mt-2">Aguarde um momento</p>
+            <p className="text-foreground font-medium text-sm">Carregando...</p>
           </div>
         </div>
       </div>
@@ -87,9 +83,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-      <div className="container mx-auto px-4 lg:px-6 py-6 lg:py-8 max-w-7xl">
-        <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-8 max-w-7xl">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <DashboardMetrics />
           <LeadsTable />
         </div>
