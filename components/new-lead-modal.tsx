@@ -32,6 +32,9 @@ export function NewLeadModal({ open, onOpenChange, onSuccess, stages }: NewLeadM
     stage_id: "",
     interessado: false,
     observacoes: "",
+    utm_source: "",
+    utm_medium: "",
+    utm_campaign: "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +56,9 @@ export function NewLeadModal({ open, onOpenChange, onSuccess, stages }: NewLeadM
         follow_up: 0,
         last_followup: null,
         followup_status: "pendente",
+        utm_source: formData.utm_source || null,
+        utm_medium: formData.utm_medium || null,
+        utm_campaign: formData.utm_campaign || null,
       }
 
       const result = await createLead(leadData)
@@ -75,6 +81,9 @@ export function NewLeadModal({ open, onOpenChange, onSuccess, stages }: NewLeadM
           stage_id: "",
           interessado: false,
           observacoes: "",
+          utm_source: "",
+          utm_medium: "",
+          utm_campaign: "",
         })
       } else {
         throw new Error("Falha ao criar lead")
@@ -196,6 +205,67 @@ export function NewLeadModal({ open, onOpenChange, onSuccess, stages }: NewLeadM
               placeholder="Notas adicionais sobre o lead"
               rows={3}
             />
+          </div>
+
+          {/* UTM Tracking */}
+          <div className="border-t border-border pt-4 mt-2">
+            <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1.5">
+              📊 Rastreamento de Tráfego
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="utm_source" className="text-xs">Fonte</Label>
+                <Select
+                  value={formData.utm_source}
+                  onValueChange={(value) => setFormData({ ...formData, utm_source: value })}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Origem" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="google">Google</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    <SelectItem value="organic">Orgânico</SelectItem>
+                    <SelectItem value="referral">Indicação</SelectItem>
+                    <SelectItem value="email">E-mail</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="utm_medium" className="text-xs">Mídia</Label>
+                <Select
+                  value={formData.utm_medium}
+                  onValueChange={(value) => setFormData({ ...formData, utm_medium: value })}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cpc">CPC</SelectItem>
+                    <SelectItem value="cpm">CPM</SelectItem>
+                    <SelectItem value="social">Social</SelectItem>
+                    <SelectItem value="organic">Orgânico</SelectItem>
+                    <SelectItem value="referral">Referral</SelectItem>
+                    <SelectItem value="email">E-mail</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="utm_campaign" className="text-xs">Campanha</Label>
+                <Input
+                  id="utm_campaign"
+                  value={formData.utm_campaign}
+                  onChange={(e) => setFormData({ ...formData, utm_campaign: e.target.value })}
+                  placeholder="Nome"
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">

@@ -17,7 +17,8 @@ import {
   Kanban,
   Users,
   BarChart3,
-  CheckCircle2
+  CheckCircle2,
+  Megaphone
 } from "lucide-react"
 import { getCurrentUser, signOut } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
@@ -28,6 +29,7 @@ const navigation = [
   { name: "Leads", href: "/dashboard/leads", icon: Users },
   { name: "Tarefas", href: "/dashboard/tasks", icon: CheckCircle2 },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  { name: "Campanhas", href: "/dashboard/campanhas", icon: Megaphone },
   { name: "Cursos", href: "/dashboard/cursos", icon: GraduationCap },
 ]
 

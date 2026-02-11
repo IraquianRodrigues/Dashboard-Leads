@@ -60,18 +60,8 @@ export interface User {
   last_login?: string
 }
 
-export interface Cliente {
-  id: number
-  created_at: string
-  nome: string | null
-  telefone: string | null
-  trava: boolean
-  follow_up: number
-  interessado: boolean
-  last_followup: string | null
-  produto_interesse: string | null
-  followup_status: string
-}
+// Re-export Cliente from types.ts (single source of truth)
+export type { Cliente } from "./types"
 
 export interface Curso {
   id: number
@@ -258,6 +248,7 @@ export async function deleteCurso(id: number): Promise<boolean> {
 
 // Import types
 import type {
+  Cliente,
   PipelineStage,
   LeadActivity,
   LeadActivityWithLead,
@@ -737,6 +728,302 @@ export async function getLeadsPorEstagio(): Promise<LeadsPorEstagio[]> {
   }
 }
 
+// ==================== LEADS BY SOURCE ====================
+
+export interface LeadsBySource {
+  source: string
+  total: number
+  interessados: number
+  taxa_conversao: number
+}
+
+export async function getLeadsBySource(): Promise<LeadsBySource[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("origem, utm_source, interessado")
+
+    if (error) {
+      console.error("Erro ao buscar leads por origem:", error)
+      return []
+    }
+
+    if (!data || data.length === 0) return []
+
+    const sourceMap = new Map<string, { total: number; interessados: number }>()
+
+    for (const lead of data) {
+      const source = lead.utm_source || lead.origem || "Direto"
+      const current = sourceMap.get(source) || { total: 0, interessados: 0 }
+      current.total++
+      if (lead.interessado) current.interessados++
+      sourceMap.set(source, current)
+    }
+
+    return Array.from(sourceMap.entries())
+      .map(([source, stats]) => ({
+        source: formatSourceName(source),
+        total: stats.total,
+        interessados: stats.interessados,
+        taxa_conversao: stats.total > 0
+          ? Number(((stats.interessados / stats.total) * 100).toFixed(1))
+          : 0,
+      }))
+      .sort((a, b) => b.total - a.total)
+  } catch (exception) {
+    console.error("Exceção ao buscar leads por origem:", exception)
+    return []
+  }
+}
+
+function formatSourceName(source: string): string {
+  const names: Record<string, string> = {
+    whatsapp: "WhatsApp",
+    facebook: "Facebook Ads",
+    google: "Google Ads",
+    instagram: "Instagram Ads",
+    tiktok: "TikTok Ads",
+    organic: "Orgânico",
+    referral: "Indicação",
+    direct: "Direto",
+    email: "E-mail",
+    Direto: "Direto",
+  }
+  return names[source] || source.charAt(0).toUpperCase() + source.slice(1)
+}
+
+// ==================== FUNNEL DATA ====================
+
+export interface FunnelStage {
+  id: number
+  nome: string
+  ordem: number
+  cor: string
+  total: number
+  percentageOfFirst: number
+  conversionFromPrev: number | null
+}
+
+export async function getFunnelData(): Promise<FunnelStage[]> {
+  try {
+    const supabase = createClient()
+
+    const [stagesResult, leadsResult] = await Promise.all([
+      supabase
+        .from("pipeline_stages")
+        .select("id, nome, ordem, cor")
+        .eq("ativo", true)
+        .order("ordem", { ascending: true }),
+      supabase
+        .from(TABLE_NAME)
+        .select("stage_id"),
+    ])
+
+    if (stagesResult.error || leadsResult.error) {
+      console.error("Erro ao buscar dados do funil:", stagesResult.error || leadsResult.error)
+      return []
+    }
+
+    const stages = stagesResult.data || []
+    const leads = leadsResult.data || []
+
+    if (stages.length === 0) return []
+
+    const countByStage = new Map<number, number>()
+    for (const lead of leads) {
+      if (lead.stage_id != null) {
+        countByStage.set(lead.stage_id, (countByStage.get(lead.stage_id) || 0) + 1)
+      }
+    }
+
+    const firstStageCount = countByStage.get(stages[0].id) || 0
+
+    return stages.map((stage, index) => {
+      const total = countByStage.get(stage.id) || 0
+      const prevTotal = index > 0 ? (countByStage.get(stages[index - 1].id) || 0) : null
+
+      return {
+        id: stage.id,
+        nome: stage.nome,
+        ordem: stage.ordem,
+        cor: stage.cor,
+        total,
+        percentageOfFirst: firstStageCount > 0
+          ? Number(((total / firstStageCount) * 100).toFixed(1))
+          : 0,
+        conversionFromPrev: prevTotal !== null && prevTotal > 0
+          ? Number(((total / prevTotal) * 100).toFixed(1))
+          : null,
+      }
+    })
+  } catch (exception) {
+    console.error("Exceção ao buscar dados do funil:", exception)
+    return []
+  }
+}
+
+// ==================== CAMPAIGN ANALYTICS ====================
+
+export interface CampaignData {
+  campaign: string
+  source: string
+  medium: string
+  total: number
+  interessados: number
+  taxa_conversao: number
+  primeiro_lead: string
+  ultimo_lead: string
+}
+
+export interface CampaignSummary {
+  total_campaigns: number
+  total_leads_com_utm: number
+  total_leads_sem_utm: number
+  melhor_campanha: string | null
+  melhor_fonte: string | null
+  campaigns: CampaignData[]
+  sources_summary: Array<{ source: string; total: number; interessados: number; taxa_conversao: number }>
+  mediums_summary: Array<{ medium: string; total: number; interessados: number; taxa_conversao: number }>
+  daily_leads: Array<{ date: string; total: number; fonte: string }>
+}
+
+export async function getCampaignAnalytics(): Promise<CampaignSummary> {
+  const empty: CampaignSummary = {
+    total_campaigns: 0,
+    total_leads_com_utm: 0,
+    total_leads_sem_utm: 0,
+    melhor_campanha: null,
+    melhor_fonte: null,
+    campaigns: [],
+    sources_summary: [],
+    mediums_summary: [],
+    daily_leads: [],
+  }
+
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select("utm_source, utm_medium, utm_campaign, interessado, created_at")
+
+    if (error || !data) {
+      console.error("Erro ao buscar campaign analytics:", error)
+      return empty
+    }
+
+    const leadsComUtm = data.filter((l) => l.utm_source || l.utm_campaign)
+    const leadsSemUtm = data.filter((l) => !l.utm_source && !l.utm_campaign)
+
+    // Group by campaign
+    interface CampaignAccumulator { source: string; medium: string; total: number; interessados: number; dates: string[] }
+    const campaignMap = new Map<string, CampaignAccumulator>()
+    for (const lead of leadsComUtm) {
+      const campaign = lead.utm_campaign || "(sem campanha)"
+      let current = campaignMap.get(campaign)
+      if (!current) {
+        current = {
+          source: lead.utm_source || "direto",
+          medium: lead.utm_medium || "none",
+          total: 0,
+          interessados: 0,
+          dates: [] as string[],
+        }
+      }
+      current.total++
+      if (lead.interessado) current.interessados++
+      current.dates.push(lead.created_at as string)
+      campaignMap.set(campaign, current)
+    }
+
+    const campaigns: CampaignData[] = Array.from(campaignMap.entries())
+      .map(([campaign, stats]) => ({
+        campaign: formatSourceName(campaign),
+        source: formatSourceName(stats.source),
+        medium: stats.medium,
+        total: stats.total,
+        interessados: stats.interessados,
+        taxa_conversao: stats.total > 0
+          ? Number(((stats.interessados / stats.total) * 100).toFixed(1))
+          : 0,
+        primeiro_lead: stats.dates.sort()[0] || "",
+        ultimo_lead: stats.dates.sort().reverse()[0] || "",
+      }))
+      .sort((a, b) => b.total - a.total)
+
+    // Group by source
+    const sourceMap = new Map<string, { total: number; interessados: number }>()
+    for (const lead of leadsComUtm) {
+      const source = formatSourceName(lead.utm_source || "direto")
+      const current = sourceMap.get(source) || { total: 0, interessados: 0 }
+      current.total++
+      if (lead.interessado) current.interessados++
+      sourceMap.set(source, current)
+    }
+    const sources_summary = Array.from(sourceMap.entries())
+      .map(([source, s]) => ({
+        source,
+        total: s.total,
+        interessados: s.interessados,
+        taxa_conversao: s.total > 0 ? Number(((s.interessados / s.total) * 100).toFixed(1)) : 0,
+      }))
+      .sort((a, b) => b.total - a.total)
+
+    // Group by medium
+    const mediumMap = new Map<string, { total: number; interessados: number }>()
+    for (const lead of leadsComUtm) {
+      const medium = lead.utm_medium || "none"
+      const current = mediumMap.get(medium) || { total: 0, interessados: 0 }
+      current.total++
+      if (lead.interessado) current.interessados++
+      mediumMap.set(medium, current)
+    }
+    const mediums_summary = Array.from(mediumMap.entries())
+      .map(([medium, s]) => ({
+        medium,
+        total: s.total,
+        interessados: s.interessados,
+        taxa_conversao: s.total > 0 ? Number(((s.interessados / s.total) * 100).toFixed(1)) : 0,
+      }))
+      .sort((a, b) => b.total - a.total)
+
+    // Daily leads (last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const dailyMap = new Map<string, { total: number; fonte: string }>()
+    for (const lead of leadsComUtm) {
+      const d = new Date(lead.created_at)
+      if (d >= thirtyDaysAgo) {
+        const dateKey = d.toISOString().slice(0, 10)
+        const current = dailyMap.get(dateKey) || { total: 0, fonte: lead.utm_source || "" }
+        current.total++
+        dailyMap.set(dateKey, current)
+      }
+    }
+    const daily_leads = Array.from(dailyMap.entries())
+      .map(([date, d]) => ({ date, total: d.total, fonte: d.fonte }))
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    const melhorCampanha = campaigns[0]?.campaign || null
+    const melhorFonte = sources_summary[0]?.source || null
+
+    return {
+      total_campaigns: campaigns.length,
+      total_leads_com_utm: leadsComUtm.length,
+      total_leads_sem_utm: leadsSemUtm.length,
+      melhor_campanha: melhorCampanha,
+      melhor_fonte: melhorFonte,
+      campaigns,
+      sources_summary,
+      mediums_summary,
+      daily_leads,
+    }
+  } catch (exception) {
+    console.error("Exceção ao buscar campaign analytics:", exception)
+    return empty
+  }
+}
+
 export async function getLeadCompleto(leadId: number): Promise<LeadCompleto | null> {
   try {
     const supabase = createClient()
@@ -860,20 +1147,24 @@ import type { LeadClosureWonData, LeadClosureLostData } from "./lead-closure-typ
 /**
  * Fecha um lead como ganho (convertido em cliente)
  */
-export async function closeLeadAsWon(leadId: number, data: LeadClosureWonData): Promise<boolean> {
+export async function closeLeadAsWon(leadId: number, data: LeadClosureWonData, stageId?: number): Promise<boolean> {
   try {
     const supabase = createClient()
     
     // 1. Atualizar lead
+    const updateData: Record<string, unknown> = {
+      valor_fechado: data.valor_fechado,
+      data_inicio_contrato: data.data_inicio_contrato,
+      duracao_contrato_meses: data.duracao_contrato_meses,
+      is_cliente_ativo: true,
+      interessado: true,
+      data_conversao: new Date().toISOString(),
+    }
+    if (stageId) updateData.stage_id = stageId
+
     const { error: updateError } = await supabase
       .from(TABLE_NAME)
-      .update({
-        valor_fechado: data.valor_fechado,
-        data_inicio_contrato: data.data_inicio_contrato,
-        duracao_contrato_meses: data.duracao_contrato_meses,
-        is_cliente_ativo: true,
-        data_conversao: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", leadId)
 
     if (updateError) {
@@ -925,7 +1216,7 @@ export async function closeLeadAsWon(leadId: number, data: LeadClosureWonData): 
 /**
  * Fecha um lead como perdido
  */
-export async function closeLeadAsLost(leadId: number, data: LeadClosureLostData): Promise<boolean> {
+export async function closeLeadAsLost(leadId: number, data: LeadClosureLostData, stageId?: number): Promise<boolean> {
   try {
     const supabase = createClient()
     
@@ -935,12 +1226,15 @@ export async function closeLeadAsLost(leadId: number, data: LeadClosureLostData)
       : data.motivo_perda
 
     // 1. Atualizar lead
+    const updateData: Record<string, unknown> = {
+      motivo_perda: motivoFinal,
+      observacoes: data.observacoes || null,
+    }
+    if (stageId) updateData.stage_id = stageId
+
     const { error: updateError } = await supabase
       .from(TABLE_NAME)
-      .update({
-        motivo_perda: motivoFinal,
-        observacoes: data.observacoes || null,
-      })
+      .update(updateData)
       .eq("id", leadId)
 
     if (updateError) {

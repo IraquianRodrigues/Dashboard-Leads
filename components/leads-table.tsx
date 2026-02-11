@@ -17,10 +17,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { ChevronLeft, ChevronRight, Lock, Unlock, Filter, MessageCircle, Phone, Search, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Lock, Unlock, Filter, MessageCircle, Phone, Search, X, Download } from "lucide-react"
 import { getClientes, updateClienteStatus, type Cliente } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { exportLeadsToCsv } from "@/lib/export-csv"
 
 const ITEMS_PER_PAGE = 20
 
@@ -133,9 +134,27 @@ export function LeadsTable() {
                 <p className="text-xs text-muted-foreground">Gerencie seus contatos e conversas</p>
               </div>
             </div>
-            <Badge variant="secondary" className="font-medium">
-              {filteredClientes.length} {filteredClientes.length === 1 ? "lead" : "leads"}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  exportLeadsToCsv(filteredClientes)
+                  toast({
+                    title: "CSV exportado!",
+                    description: `${filteredClientes.length} leads exportados com sucesso.`,
+                  })
+                }}
+                disabled={filteredClientes.length === 0}
+              >
+                <Download className="h-3 w-3" />
+                Exportar
+              </Button>
+              <Badge variant="secondary" className="font-medium">
+                {filteredClientes.length} {filteredClientes.length === 1 ? "lead" : "leads"}
+              </Badge>
+            </div>
           </div>
 
           {/* Search and Filters */}

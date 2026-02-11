@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardMetrics } from "@/components/dashboard-metrics"
 import { LeadsTable } from "@/components/leads-table"
+import { LeadsBySourceCard } from "@/components/leads-by-source"
 import { getCurrentUser, onAuthStateChange } from "@/lib/supabase"
 import { MessageCircle } from "lucide-react"
 
@@ -87,6 +88,7 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-8 max-w-7xl">
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <DashboardMetrics />
+          <LeadsBySourceCard />
           <LeadsTable />
         </div>
       </div>

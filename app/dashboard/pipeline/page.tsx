@@ -33,12 +33,14 @@ import { useToast } from "@/hooks/use-toast"
 export default function PipelinePage() {
   const [stages, setStages] = useState<PipelineStage[]>([])
   const [leads, setLeads] = useState<Cliente[]>([])
+  const [allLeads, setAllLeads] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false)
   const [closureModalOpen, setClosureModalOpen] = useState(false)
   const [closureType, setClosureType] = useState<LeadClosureType | null>(null)
   const [closingLead, setClosingLead] = useState<Cliente | null>(null)
+  const [closureStageId, setClosureStageId] = useState<number | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -53,7 +55,12 @@ export default function PipelinePage() {
         getClientes(),
       ])
       setStages(stagesData)
-      setLeads(leadsData)
+      setAllLeads(leadsData)
+      // Filtrar leads fechados (ganho ou perdido) para não aparecerem no kanban
+      const activeLeads = leadsData.filter(
+        (l) => !l.is_cliente_ativo && !l.motivo_perda
+      )
+      setLeads(activeLeads)
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
     } finally {
@@ -109,6 +116,7 @@ export default function PipelinePage() {
         // Abrir modal de fechamento como ganho
         setClosingLead(lead)
         setClosureType('won')
+        setClosureStageId(newStageId)
         setClosureModalOpen(true)
         return // Não mover ainda, esperar modal
       }
@@ -117,6 +125,7 @@ export default function PipelinePage() {
         // Abrir modal de fechamento como perdido
         setClosingLead(lead)
         setClosureType('lost')
+        setClosureStageId(newStageId)
         setClosureModalOpen(true)
         return // Não mover ainda, esperar modal
       }
@@ -173,11 +182,15 @@ export default function PipelinePage() {
     setClosureModalOpen(false)
     setClosingLead(null)
     setClosureType(null)
+    setClosureStageId(null)
   }
 
-  const totalLeads = leads.length
-  const totalValor = leads.reduce((sum, l) => sum + (l.valor_potencial || 0), 0)
-  const totalInteressados = leads.filter(l => l.interessado).length
+  // Stats usam TODOS os leads (incluindo fechados)
+  const totalLeads = allLeads.length
+  const totalValor = allLeads.reduce((sum, l) => sum + (l.valor_potencial || 0), 0)
+  const convertidos = allLeads.filter(l => l.is_cliente_ativo).length
+  const taxaConversao = totalLeads > 0 ? ((convertidos / totalLeads) * 100).toFixed(0) : "0"
+  const valorFechado = allLeads.filter(l => l.is_cliente_ativo).reduce((sum, l) => sum + (l.valor_fechado || 0), 0)
 
   if (loading) {
     return (
@@ -238,12 +251,13 @@ export default function PipelinePage() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <GlassCard className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total de Leads</p>
                 <p className="text-2xl font-bold">{totalLeads}</p>
+                <p className="text-xs text-muted-foreground">{leads.length} ativos no pipeline</p>
               </div>
               <UsersIcon className="h-8 w-8 text-[var(--whatsapp-green)]" />
             </div>
@@ -252,7 +266,7 @@ export default function PipelinePage() {
           <GlassCard className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Valor Total</p>
+                <p className="text-sm text-muted-foreground">Valor em Pipeline</p>
                 <p className="text-2xl font-bold">R$ {(totalValor / 1000).toFixed(0)}k</p>
               </div>
               <DollarSign className="h-8 w-8 text-[#25D366]" />
@@ -263,11 +277,21 @@ export default function PipelinePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de Conversão</p>
-                <p className="text-2xl font-bold">
-                  {totalLeads > 0 ? ((totalInteressados / totalLeads) * 100).toFixed(0) : 0}%
-                </p>
+                <p className="text-2xl font-bold">{taxaConversao}%</p>
+                <p className="text-xs text-muted-foreground">{convertidos} convertidos</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500" />
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Negócios Fechados</p>
+                <p className="text-2xl font-bold text-[#25D366]">R$ {valorFechado > 0 ? (valorFechado / 1000).toFixed(1) + "k" : "0"}</p>
+                <p className="text-xs text-muted-foreground">{convertidos} clientes ativos</p>
+              </div>
+              <Target className="h-8 w-8 text-[#25D366]" />
             </div>
           </GlassCard>
         </div>
@@ -319,6 +343,7 @@ export default function PipelinePage() {
           onOpenChange={setClosureModalOpen}
           lead={closingLead}
           closureType={closureType}
+          stageId={closureStageId}
           onSuccess={handleClosureSuccess}
         />
       </div>

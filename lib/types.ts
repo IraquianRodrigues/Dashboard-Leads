@@ -32,6 +32,12 @@ export interface Cliente {
   data_inicio_contrato?: string | null
   duracao_contrato_meses?: number | null
   is_cliente_ativo?: boolean
+  // UTM Tracking (Tráfego Pago)
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_content?: string | null
+  utm_term?: string | null
 }
 
 // Estágio do Pipeline

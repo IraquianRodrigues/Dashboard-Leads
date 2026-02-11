@@ -20,6 +20,7 @@ interface LeadClosureModalProps {
   onOpenChange: (open: boolean) => void
   lead: Cliente | null
   closureType: LeadClosureType | null
+  stageId?: number | null
   onSuccess: () => void
 }
 
@@ -28,6 +29,7 @@ export function LeadClosureModal({
   onOpenChange,
   lead,
   closureType,
+  stageId,
   onSuccess,
 }: LeadClosureModalProps) {
   const { toast } = useToast()
@@ -70,7 +72,7 @@ export function LeadClosureModal({
           return
         }
 
-        const success = await closeLeadAsWon(lead.id, wonData)
+        const success = await closeLeadAsWon(lead.id, wonData, stageId || undefined)
         
         if (success) {
           toast({
@@ -94,7 +96,7 @@ export function LeadClosureModal({
           return
         }
 
-        const success = await closeLeadAsLost(lead.id, lostData)
+        const success = await closeLeadAsLost(lead.id, lostData, stageId || undefined)
         
         if (success) {
           toast({
