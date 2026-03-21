@@ -7,30 +7,20 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { 
   LayoutDashboard, 
-  GraduationCap, 
   Menu, 
   X,
   MessageCircle,
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Kanban,
-  Users,
-  BarChart3,
-  CheckCircle2,
-  Megaphone
+  Users
 } from "lucide-react"
 import { getCurrentUser, signOut } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
-  { name: "Leads", href: "/dashboard/leads", icon: Users },
-  { name: "Tarefas", href: "/dashboard/tasks", icon: CheckCircle2 },
-  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { name: "Campanhas", href: "/dashboard/campanhas", icon: Megaphone },
-  { name: "Cursos", href: "/dashboard/cursos", icon: GraduationCap },
+  { name: "Cliente", href: "/dashboard/cliente", icon: Users },
 ]
 
 export function Sidebar() {
@@ -122,12 +112,12 @@ export function Sidebar() {
             isCollapsed && "justify-center px-4"
           )}>
             <div className="flex items-center justify-center w-10 h-10 rounded-md bg-zinc-900 text-white border border-zinc-800 flex-shrink-0">
-              <MessageCircle className="h-5 w-5 text-[#25D366]" />
+              <MessageCircle className="h-5 w-5 text-[var(--whatsapp-green)]" />
             </div>
             {!isCollapsed && (
               <div className="min-w-0">
-                <h2 className="font-semibold text-base truncate">TopCursos</h2>
-                <p className="text-xs text-muted-foreground truncate">Workspace</p>
+                <h2 className="font-semibold text-lg truncate">TopCursos</h2>
+                <p className="text-sm text-muted-foreground truncate">Workspace</p>
               </div>
             )}
             
@@ -158,7 +148,7 @@ export function Sidebar() {
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 group relative",
+                    "flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium transition-all duration-200 group relative",
                     isActive
                       ? "bg-zinc-900 text-white shadow-sm"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -168,9 +158,9 @@ export function Sidebar() {
                 >
                   <item.icon className={cn(
                     "h-4 w-4 flex-shrink-0 transition-colors",
-                    isActive ? "text-[#25D366]" : "text-muted-foreground group-hover:text-foreground"
+                    isActive ? "text-[var(--whatsapp-green)]" : "text-muted-foreground group-hover:text-foreground"
                   )} />
-                  {!isCollapsed && <span>{item.name}</span>}
+                  {!isCollapsed && <span className="leading-6">{item.name}</span>}
                 </Link>
               )
             })}

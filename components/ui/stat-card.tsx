@@ -20,7 +20,7 @@ const variantStyles = {
     iconColor: "text-zinc-500 dark:text-zinc-400",
   },
   primary: {
-    iconColor: "text-[#25D366]",
+    iconColor: "text-[var(--whatsapp-green)]",
   },
   success: {
     iconColor: "text-emerald-500",

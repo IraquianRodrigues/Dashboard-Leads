@@ -15,13 +15,13 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
         success:
-          "border-transparent bg-green-500 text-white shadow hover:bg-green-600",
+          "border-transparent bg-[var(--whatsapp-green)] text-white shadow hover:bg-[var(--whatsapp-dark-green)]",
         warning:
           "border-transparent bg-orange-500 text-white shadow hover:bg-orange-600",
         info:
-          "border-transparent bg-[#25D366] text-white shadow hover:bg-[#128C7E]",
+          "border-transparent bg-[var(--whatsapp-green)] text-white shadow hover:bg-[var(--whatsapp-dark-green)]",
         whatsapp:
-          "border-transparent bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white shadow hover:opacity-90",
+          "border-transparent bg-gradient-to-r from-[var(--whatsapp-green)] to-[var(--whatsapp-dark-green)] text-white shadow hover:opacity-90",
       },
     },
     defaultVariants: {
